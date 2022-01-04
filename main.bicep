@@ -1,19 +1,14 @@
 targetScope = 'subscription'
 
-// Global Parameters
 @description('Azure region where the Resource Group and its resources will be deployed')
 param location string
 @description('Tags associated with all resources')
 param tags object
-
 param resourceGroupName string
-param vnetNames object
-
-var hubVNetName = vnetNames.hub
-var onPremVNetName = vnetNames.onPrem
-var spoke1VNetName = vnetNames.spoke1
-var privateLinkVNetName = vnetNames.privateLink
-
+param hubVNetInfo object
+param onPremVNetInfo object
+param spoke1VNetInfo object
+param privateLinkVNetInfo object
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -22,36 +17,35 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 }
 
 module VNetHub 'modules/hub.bicep' = {
-  name: hubVNetName
   scope: resourceGroup
+  name: hubVNetInfo.name
   params: {
-    name: hubVNetName
+    info: hubVNetInfo
   }
 }
 
 module VNetOnPrem 'modules/onPrem.bicep' = {
-  name: onPremVNetName
   scope: resourceGroup
+  name: onPremVNetInfo.name
   params: {
-    name: hubVNetName
+    info: onPremVNetInfo
   }
 }
 
-module VNetSpoke1 'modules/spoke.bicep'= {
-  name: spoke1VNetName
+module VNetSpoke1 'modules/spoke.bicep' = {
   scope: resourceGroup
+  name: spoke1VNetInfo.name
   params: {
-    name: hubVNetName
-    spoke1VnetInfo: {}
+    info: spoke1VNetInfo
     vmSpoke1: {}
     vmSpoke1AdminPassword: ''
   }
 }
 
 module VNetPrivateLink 'modules/privatelink.bicep' = {
-  name: privateLinkVNetName
   scope: resourceGroup
+  name: privateLinkVNetInfo.name
   params: {
-    name: hubVNetName
+    info: privateLinkVNetInfo
   }
 }

@@ -13,12 +13,28 @@
         "resourceGroupName": {
             "value": "rg-network-fundamentals"
         },
-        "vnetNames": {
+        "hubVnetInfo": {
             "value": {
-                "hub": "vnet-hub",
-                "onPrem": "vnet-onprem",
-                "spoke1": "vnet-spoke1",
-                "privateLink": "vnet-privatelink"
+                "name": "vnet-hub",
+                "range": "10.0.1.0/24"
+            }
+        },
+        "onPremVNetInfo": {
+            "value": {
+                "name": "vnet-onpremises",
+                "range": "10.0.0.0/24"
+            }
+        },
+        "spoke1VNetInfo": {
+            "value": {
+                "name": "vnet-spoke1",
+                "range": "10.0.2.0/24"
+            }
+        },
+        "privateLinkVNetInfo": {
+            "value": {
+                "name": "vnet-privatelink",
+                "range": "192.168.0.0/24"
             }
         }
     }

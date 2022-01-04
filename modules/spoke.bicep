@@ -1,13 +1,12 @@
 param location string = resourceGroup().location
 param rgName string = resourceGroup().name
-param name string
-
 
 @description('Name and range for spoke1 services vNet')
-param spoke1VnetInfo object
+param info object
+var name = info.name
 
-var spoke1SnetsInfo = spoke1VnetInfo.subnets
-var deployCustomDnsOnSpoke1Vnet = spoke1VnetInfo.deployCustomDns
+var spoke1SnetsInfo = info.subnets
+var deployCustomDnsOnSpoke1Vnet = info.deployCustomDns
 
 @description('Spoke1\'s  configuration details')
 param vmSpoke1 object
