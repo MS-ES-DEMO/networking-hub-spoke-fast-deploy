@@ -1,4 +1,4 @@
-# Networking Fundamentals - Fast Deploy
+# Hub-spoke network topology - Fast Deploy
 
 This repository contains an Azure Bicep template to simplify the deployment of a Hub and Spoke network architecture with fundamental network services in a test or demo environment.
 
