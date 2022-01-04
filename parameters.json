@@ -1,19 +1,25 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "location": {
-      "value": "northeurope"
-    },
-    "tags": {
-      "value": {
-        "project": "fd-network-fundamentals"
-      }
-    },
-    "resourceGroupNames": {
-      "value": {
-        "network": "rg-network-fundamentals"
-      }
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "northeurope"
+        },
+        "tags": {
+            "value": {
+                "project": "fd-network-fundamentals"
+            }
+        },
+        "resourceGroupName": {
+            "value": "rg-network-fundamentals"
+        },
+        "vnetNames": {
+            "value": {
+                "hub": "vnet-hub",
+                "onPrem": "vnet-onprem",
+                "spoke1": "vnet-spoke1",
+                "privateLink": "vnet-privatelink"
+            }
+        }
     }
-  }
 }
