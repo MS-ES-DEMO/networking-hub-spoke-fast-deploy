@@ -9,6 +9,6 @@ param (
   $deploymentPrefix='Network-Fundamentals'
   )
 
-$deploymentName = $deploymentPrefix
+$deploymentName = "$deploymentPrefix-$(New-Guid)"
 
-az deployment sub create -l westeurope -n $deploymentName --template-file $templateFile --parameters $parameterFile
+az deployment sub create -l $location -n $deploymentName --template-file $templateFile --parameters $parameterFile
