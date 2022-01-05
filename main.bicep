@@ -8,7 +8,9 @@ param resourceGroupName string
 param hubVNetInfo object
 param onPremVNetInfo object
 param spoke1VNetInfo object
-param privateLinkVNetInfo object
+@description('Admin password for onPrem VM')
+@secure()
+param vmOnPremAdminPassword string
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName

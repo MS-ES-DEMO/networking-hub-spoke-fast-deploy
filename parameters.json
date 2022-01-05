@@ -39,7 +39,8 @@
                         "name": "vm-onpremises",
                         "sku": "Standard_DS2_V2",
                         "nicName": "nic-vm-onpremises",
-                        "adminUsername": "azureAdmin"
+                        "adminUsername": "azureAdmin",
+                        "osDiskSizeGB": 30
                     }
                 }
             }
