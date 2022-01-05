@@ -22,7 +22,27 @@
         "onPremVNetInfo": {
             "value": {
                 "name": "vnet-onpremises",
-                "range": "10.0.0.0/24"
+                "range": "10.0.0.0/24",
+                "subnets": [
+                    {
+                        "name": "NetworkVirtualAppliances",
+                        "range": "10.0.0.0/28"
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "range": "10.0.0.240/28"
+                    }
+                ],
+                "vms": {
+                    "value": {
+                        "vmOnpremises": {
+                            "name": "vm-onpremises",
+                            "sku": "Standard_DS2_V2",
+                            "nicName": "nic-vm-onpremises",
+                            "adminUsername": "azureAdmin"
+                        }
+                    }
+                }
             }
         },
         "spoke1VNetInfo": {
