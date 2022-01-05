@@ -6,7 +6,7 @@ param vNet object
 param adminPassword string
 
 resource NICs 'Microsoft.Network/networkInterfaces@2021-05-01' = [for nic in vmInfo.nics: {
-  name: nic.nicName
+  name: nic.name
   location: location
   tags: tags
   properties: {
@@ -16,7 +16,7 @@ resource NICs 'Microsoft.Network/networkInterfaces@2021-05-01' = [for nic in vmI
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: '${vNet.id}/subnets/${nic.subnetName}'
+            id: '/subscriptions/${vNet.subscriptionId}/resourceGroups/${vNet.resourceGroupName}/providers/${vNet.resourceId}/subnets/${nic.subnetName}'
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
