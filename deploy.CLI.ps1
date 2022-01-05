@@ -1,14 +1,14 @@
 param (
   [string]
   $location = "westeurope",
-  [string] 
+  [string]
   $templateFile = ".\main.bicep",
   [string]
   $parameterFile = "parameters.json",
-  [string] 
+  [string]
   $deploymentPrefix='Network-Fundamentals'
   )
+$date = $((Get-Date -UFormat "%Y-%m-%dT%H-%M-%S_%ZZ").Replace("+",""))
+$deploymentName = "$deploymentPrefix-$($date)"
 
-$deploymentName = $deploymentPrefix
-
-az deployment sub create -l westeurope -n $deploymentName --template-file $templateFile --parameters $parameterFile
+az deployment sub create -l $location -n $deploymentName --template-file $templateFile --parameters $parameterFile
