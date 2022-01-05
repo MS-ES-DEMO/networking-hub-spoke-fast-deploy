@@ -1,5 +1,4 @@
 param location string = resourceGroup().location
-param rgName string = resourceGroup().name
 param info object
 
 resource VNetOnPrem 'Microsoft.Network/virtualNetworks@2021-05-01' = {
@@ -20,10 +19,18 @@ resource VNetOnPrem 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   }
 }
 
-resource NetworkVirtualAppliances 'Microsoft.Network/networkVirtualAppliances@2021-05-01' = {
-  name: info.vms.vmOnpremises.name
+// This would have to be substituted by an NVA for more complex traffic
+resource VMs 'Microsoft.Compute/virtualMachines@2021-07-01' = [for vm in items(info.vms): {
   location: location
+  name: vm.value.name
   properties: {
-    
+    hardwareProfile: {
+      vmSize: vm.value.sku
+    }
   }
+}]
+
+resource VPNGateway 'Microsoft.Network/vpnGateways@2021-05-01' = {
+  name: info.vpnGatewayName
+  location: location
 }

@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "northeurope"
+            "value": "westeurope"
         },
         "tags": {
             "value": {
@@ -33,14 +33,13 @@
                         "range": "10.0.0.240/28"
                     }
                 ],
+                "vpnGatewayName": "gw-vpn-onpremises",
                 "vms": {
-                    "value": {
-                        "vmOnpremises": {
-                            "name": "vm-onpremises",
-                            "sku": "Standard_DS2_V2",
-                            "nicName": "nic-vm-onpremises",
-                            "adminUsername": "azureAdmin"
-                        }
+                    "vmOnPremises": {
+                        "name": "vm-onpremises",
+                        "sku": "Standard_DS2_V2",
+                        "nicName": "nic-vm-onpremises",
+                        "adminUsername": "azureAdmin"
                     }
                 }
             }
