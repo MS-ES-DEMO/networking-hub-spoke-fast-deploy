@@ -1,11 +1,14 @@
 param location string = resourceGroup().location
+param tags object
 param info object
 @secure()
 param vmOnPremAdminPassword string
+var vms = info.vms
 
-resource VNetOnPrem 'Microsoft.Network/virtualNetworks@2021-05-01' = {
+resource VNet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   name: info.name
   location: location
+  tags: tags
   properties: {
     addressSpace: {
       addressPrefixes: [
@@ -22,43 +25,22 @@ resource VNetOnPrem 'Microsoft.Network/virtualNetworks@2021-05-01' = {
 }
 
 // This would have to be substituted by an NVA for more complex traffic
-resource VMs 'Microsoft.Compute/virtualMachines@2021-07-01' = [for vm in items(info.vms): {
-  location: location
-  name: vm.value.name
-  properties: {
-    hardwareProfile: {
-      vmSize: vm.value.sku
-    }
-    storageProfile: {
-      imageReference: {
-        publisher: '' //TO-DO
-        sku: '' //TO-DO
-        version: 'latest'
-      }
-      osDisk: {
-        osType: 'Linux'
-        createOption: 'FromImage'
-        diskSizeGB: vm.value.osDiskSizeGB
-        managedDisk: {
-          storageAccountType: 'StandardSSD_LRS'
-        }
-      }
-    }
-    osProfile: {
-      computerName: vm.value.name
-      adminUsername: vm.value.adminUsername
-      adminPassword: vmOnPremAdminPassword
-      allowExtensionOperations: true
-      linuxConfiguration:{
-        provisionVMAgent: true
-      }
-    }
-    
-    //TO-DO: Add network interfaces
+module VMswithNICs './VM+NICs.bicep' = [for vm in vms: {
+  name: vm.name
+  params: {
+    vmInfo: vm
+    vNet: VNet
+    location: location
+    adminPassword: vmOnPremAdminPassword
+    tags: tags
   }
 }]
 
-resource VPNGateway 'Microsoft.Network/vpnGateways@2021-05-01' = {
-  name: info.vpnGatewayName
-  location: location
-}
+
+// resource VPNGateway 'Microsoft.Network/vpnGateways@2021-05-01' = {
+//   name: info.vpnGatewayName
+//   location: location
+//   dependsOn: [
+//     VNet
+//   ]
+// }

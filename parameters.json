@@ -34,15 +34,23 @@
                     }
                 ],
                 "vpnGatewayName": "gw-vpn-onpremises",
-                "vms": {
-                    "vmOnPremises": {
+                "vms": [
+                    {
                         "name": "vm-onpremises",
                         "sku": "Standard_DS2_V2",
-                        "nicName": "nic-vm-onpremises",
                         "adminUsername": "azureAdmin",
-                        "osDiskSizeGB": 30
+                        "createOption": "FromImage",
+                        "osType": "Linux",
+                        "osDiskSizeGB": 30,
+                        "osDiskType": "Standard_LRS",
+                        "nics": [
+                            {
+                                "name": "nic-vm-onpremises",
+                                "subnetName": "NetworkVirtualAppliances"
+                            }
+                        ]
                     }
-                }
+                ]
             }
         },
         "spoke1VNetInfo": {
