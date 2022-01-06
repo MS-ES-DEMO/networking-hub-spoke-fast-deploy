@@ -76,7 +76,7 @@ resource runCommand 'Microsoft.Compute/virtualMachines/runCommands@2021-07-01' =
   tags: tags
   parent: VM
   properties: {
-    // asyncExecution: true //Turn on to avoid the wait
+    asyncExecution: true //To avoid waiting
     source: {
       script: (contains(vmInfo, 'scriptToRun') && !empty(vmInfo.scriptToRun)) ? vmInfo.scriptToRun : ''
       scriptUri: (contains(vmInfo, 'scriptUri') && !empty(vmInfo.scriptUri)) ? vmInfo.scriptUri : ''
