@@ -30,7 +30,9 @@ module VNetOnPrem 'modules/onPrem.bicep' = {
   scope: resourceGroup
   name: onPremVNetInfo.name
   params: {
+    tags: tags
     info: onPremVNetInfo
+    vmOnPremAdminPassword: vmOnPremAdminPassword //They are all created with the same password
   }
 }
 

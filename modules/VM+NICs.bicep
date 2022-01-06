@@ -15,11 +15,13 @@ resource NICs 'Microsoft.Network/networkInterfaces@2021-05-01' = [for nic in nic
       {
         name: 'ipconfig1'
         properties: {
-          privateIPAllocationMethod: 'Dynamic'
+
           subnet: {
             id: '/subscriptions/${vNet.subscriptionId}/resourceGroups/${vNet.resourceGroupName}/providers/${vNet.resourceId}/subnets/${nic.subnetName}'
           }
           primary: true
+          privateIPAllocationMethod: contains(nic, 'privateIPAddress') && !empty(nic.privateIPAddress) ? 'Static' : 'Dynamic'
+          privateIPAddress: contains(nic, 'privateIPAddress') && !empty(nic.privateIPAddress) ? nic.privateIPAddress : null
           privateIPAddressVersion: 'IPv4'
         }
       }
