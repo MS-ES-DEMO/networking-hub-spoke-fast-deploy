@@ -67,3 +67,18 @@ resource VM 'Microsoft.Compute/virtualMachines@2021-07-01' = {
     }
   }
 }
+
+resource runCommand 'Microsoft.Compute/virtualMachines/runCommands@2021-07-01' = if ((contains(vmInfo, 'scriptToRun') && !empty(vmInfo.scriptToRun)) || (contains(vmInfo, 'scriptUri') && !empty(vmInfo.scriptUri))) {
+  name: '${vmInfo.name}-runCommand'
+  location: location
+  tags: tags
+  parent: VM
+  properties: {
+    // asyncExecution: true //Turn on to avoid the wait
+    source: {
+      script: (contains(vmInfo, 'scriptToRun') && !empty(vmInfo.scriptToRun)) ? vmInfo.scriptToRun : ''
+      scriptUri: (contains(vmInfo, 'scriptUri') && !empty(vmInfo.scriptUri)) ? vmInfo.scriptUri : ''
+    }
+    timeoutInSeconds: (contains(vmInfo, 'timeoutInSeconds') && !empty(vmInfo.timeoutInSeconds)) ? vmInfo.timeoutInSeconds : null
+  }
+}
