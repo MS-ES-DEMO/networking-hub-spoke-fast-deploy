@@ -4,8 +4,9 @@ param vmInfo object
 param vNet object
 @secure()
 param adminPassword string
+var nicsInfo = vmInfo.nics
 
-resource NICs 'Microsoft.Network/networkInterfaces@2021-05-01' = [for nic in vmInfo.nics: {
+resource NICs 'Microsoft.Network/networkInterfaces@2021-05-01' = [for nic in nicsInfo: {
   name: nic.name
   location: location
   tags: tags
@@ -60,7 +61,7 @@ resource VM 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       }
     }
     networkProfile: {
-      networkInterfaces: [for i in range(0, length(vmInfo.nics)): {
+      networkInterfaces: [for i in range(0, length(nicsInfo)): {
         id: NICs[i].id
       }]
     }
