@@ -5,6 +5,7 @@ param vNet object
 @secure()
 param adminPassword string
 var nicsInfo = vmInfo.nics
+var scripts = contains(vmInfo, 'scripts') ? vmInfo.scripts : {}
 
 resource NICs 'Microsoft.Network/networkInterfaces@2021-05-01' = [for nic in nicsInfo: {
   name: nic.name
@@ -15,7 +16,6 @@ resource NICs 'Microsoft.Network/networkInterfaces@2021-05-01' = [for nic in nic
       {
         name: 'ipconfig1'
         properties: {
-
           subnet: {
             id: '/subscriptions/${vNet.subscriptionId}/resourceGroups/${vNet.resourceGroupName}/providers/${vNet.resourceId}/subnets/${nic.subnetName}'
           }
@@ -70,17 +70,10 @@ resource VM 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   }
 }
 
-resource runCommand 'Microsoft.Compute/virtualMachines/runCommands@2021-07-01' = if ((contains(vmInfo, 'scriptToRun') && !empty(vmInfo.scriptToRun)) || (contains(vmInfo, 'scriptUri') && !empty(vmInfo.scriptUri))) {
-  name: '${vmInfo.name}-runCommand'
+resource runCommand 'Microsoft.Compute/virtualMachines/runCommands@2021-07-01' = [for (script, index) in scripts: if (!empty(script)) {
+  name: '${vmInfo.name}-runCommand${index}'
   location: location
   tags: tags
   parent: VM
-  properties: {
-    asyncExecution: true //To avoid waiting
-    source: {
-      script: (contains(vmInfo, 'scriptToRun') && !empty(vmInfo.scriptToRun)) ? vmInfo.scriptToRun : ''
-      scriptUri: (contains(vmInfo, 'scriptUri') && !empty(vmInfo.scriptUri)) ? vmInfo.scriptUri : ''
-    }
-    timeoutInSeconds: (contains(vmInfo, 'timeoutInSeconds') && !empty(vmInfo.timeoutInSeconds)) ? vmInfo.timeoutInSeconds : null
-  }
-}
+  properties: script
+}]
