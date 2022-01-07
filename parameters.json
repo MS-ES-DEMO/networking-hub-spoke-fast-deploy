@@ -34,9 +34,15 @@
                     }
                 ],
                 "vpnGateway": {
+                    /* "localGateway": {
+                        "name": "gw-local-gateway",
+                        "publicIPName": "pip-local-gateway",
+                        "addressSpace": "10.0.0.224/27"
+                    }, */
                     "name": "gw-vpn-onpremises",
                     "publicIPName": "pip-vpn-onpremises",
-                    "addressSpace": "10.0.0.224/27"
+                    "publicIP2Name": "pip-vpn-onpremises2",
+                    "subnetName": "GatewaySubnet"
                 },
                 "vms": [
                     {

@@ -6,6 +6,9 @@ param vmAdminPassword string
 
 var vms = info.vms
 var vpnGateway = info.vpnGateway
+// var localGateway = info.vpnGateway.localGateway
+var ipConfig1Name = 'default'
+var ipConfig2Name = 'activeActive'
 
 resource VNet 'Microsoft.Network/virtualNetworks@2021-05-01' = {
   name: info.name
@@ -37,9 +40,10 @@ module VMswithNICs './VM+NICs.bicep' = [for vm in vms: {
     tags: tags
   }
 }]
-
-resource PublicIP 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
-  name: vpnGateway.publicIPName
+// If using a real onPrem scenario, a Local Gateway would be configured instead of a VNet-to-VNet connection
+/*
+resource LocalGatewayPublicIP 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
+  name: localGateway.publicIPName
   location: location
   tags: tags
   properties: {
@@ -47,15 +51,89 @@ resource PublicIP 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   }
 }
 
-resource VPNGateway 'Microsoft.Network/localNetworkGateways@2021-05-01' = {
+resource LocalGateway 'Microsoft.Network/localNetworkGateways@2021-05-01' = {
+  name: localGateway.name
+  location: location
+  tags: tags
+  properties: {
+    gatewayIpAddress: LocalGatewayPublicIP.properties.ipAddress
+    localNetworkAddressSpace: {
+      addressPrefixes: [
+        localGateway.addressSpace
+      ]
+    }
+  }
+} */
+
+resource VPNGatewayPublicIP 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
+  name: vpnGateway.publicIPName
+  location: location
+  tags: tags
+  properties: {
+    publicIPAllocationMethod: 'Dynamic'
+  }
+}
+
+resource VPNGatewayPublicIP2 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
+  name: vpnGateway.publicIP2Name
+  location: location
+  tags: tags
+  properties: {
+    publicIPAllocationMethod: 'Dynamic'
+  }
+}
+
+resource VPNGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
   name: vpnGateway.name
   location: location
   tags: tags
   properties: {
-    gatewayIpAddress: PublicIP.properties.ipAddress
-    localNetworkAddressSpace: {
-      addressPrefixes: [
-        vpnGateway.addressSpace
+    gatewayType: 'Vpn'
+    vpnType: 'RouteBased'
+    vpnGatewayGeneration: 'Generation1'
+    sku: {
+      name: 'VpnGw1'
+      tier: 'VpnGw1'
+    }
+    ipConfigurations: [
+      {
+        name: ipConfig1Name
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: {
+            id: VPNGatewayPublicIP.id
+          }
+          subnet: {
+            id: resourceId(VNet.properties.subnets[0].type, VNet.name, vpnGateway.subnetName)
+          }
+        }
+      }
+      {
+        name: ipConfig2Name
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: {
+            id: VPNGatewayPublicIP2.id
+          }
+          subnet: {
+            id: resourceId(VNet.properties.subnets[0].type, VNet.name, vpnGateway.subnetName)
+          }
+        }
+      }
+    ]
+    activeActive: true
+    enableBgp: false
+    bgpSettings: {
+      asn: 65510
+      bgpPeeringAddresses: [
+        {
+          ipconfigurationId: VPNGatewayPublicIP.properties.ipConfiguration.id
+          customBgpIpAddresses: []
+        }
+        {
+          ipconfigurationId: VPNGatewayPublicIP2.properties.ipConfiguration.id
+          customBgpIpAddresses: []
+        }
       ]
     }
   }
