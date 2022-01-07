@@ -5,10 +5,22 @@ param location string
 @description('Tags associated with all resources')
 param tags object
 param resourceGroupName string
-param hubVNetInfo object
-param onPremVNetInfo object
-param spoke1VNetInfo object
-param privateLinkVNetInfo object
+
+param timeStamp string = utcNow()
+
+@secure()
+param adminPassword string
+
+param hubVnetConfiguration object
+param onPremisesVnetConfiguration object
+
+param spoke1VnetConfiguration object
+param spoke1VmConfiguration object
+param spoke1StorageConfiguration object
+
+param privateLinkVnetConfiguration object
+
+
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -16,36 +28,46 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-module VNetHub 'modules/hub.bicep' = {
+module hub 'base/hub.bicep' = {
+  name: 'Hub-Deployment-${timeStamp}'
   scope: resourceGroup
-  name: hubVNetInfo.name
   params: {
-    info: hubVNetInfo
+    tags: tags
+    vnetConfiguration: hubVnetConfiguration
+    subnetConfiguration: hubVnetConfiguration.subnets
   }
 }
 
-module VNetOnPrem 'modules/onPrem.bicep' = {
+module onpremises 'base/onPremises.bicep' = {
+  name: 'OnPremises-Deployment-${timeStamp}'
   scope: resourceGroup
-  name: onPremVNetInfo.name
   params: {
-    info: onPremVNetInfo
+    tags: tags
+    vnetConfiguration: onPremisesVnetConfiguration
+    subnetConfiguration: onPremisesVnetConfiguration.subnets
   }
 }
 
-module VNetSpoke1 'modules/spoke.bicep' = {
+module spoke1 'base/spoke.bicep' = {
+  name: 'Spoke1-Deployment-${timeStamp}'
   scope: resourceGroup
-  name: spoke1VNetInfo.name
   params: {
-    info: spoke1VNetInfo
-    vmSpoke1: {}
-    vmSpoke1AdminPassword: ''
+    tags: tags
+    vnetConfiguration: spoke1VnetConfiguration
+    subnetConfiguration: spoke1VnetConfiguration.subnets
+    vmConfiguration: spoke1VmConfiguration
+    adminPassword: adminPassword
+    storageConfiguration: spoke1StorageConfiguration
   }
 }
 
-module VNetPrivateLink 'modules/privatelink.bicep' = {
+module privatelink 'base/privatelink.bicep' = {
+  name: 'PrivateLink-Deployment-${timeStamp}'
   scope: resourceGroup
-  name: privateLinkVNetInfo.name
   params: {
-    info: privateLinkVNetInfo
+    tags: tags
+    vnetConfiguration: privateLinkVnetConfiguration
+    subnetConfiguration: privateLinkVnetConfiguration.subnets
   }
 }
+

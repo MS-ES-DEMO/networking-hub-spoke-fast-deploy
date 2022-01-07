@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "northeurope"
+            "value": "westeurope"
         },
         "tags": {
             "value": {
@@ -11,30 +11,96 @@
             }
         },
         "resourceGroupName": {
-            "value": "rg-network-fundamentals"
+            "value": "rg-1"
         },
-        "hubVnetInfo": {
+        "hubVnetConfiguration": {
             "value": {
                 "name": "vnet-hub",
-                "range": "10.0.1.0/24"
+                "range": "10.0.1.0/24",
+                "subnets": {
+                    "NetworkVirtualAppliances": {
+                        "name": "NetworkVirtualAppliances",
+                        "range": "10.0.1.0/26"
+                    },
+                    "AzureBastion": {
+                        "name": "AzureBastionSubnet",
+                        "range": "10.0.1.64/26"
+                    },
+                    "AzureFirewall": {
+                        "name": "AzureFirewallSubnet",
+                        "range": "10.0.1.128/26"
+                    },
+                    "RouteServer": {
+                        "name": "RouteServerSubnet",
+                        "range": "10.0.1.192/27"
+                    },
+                    "Gateway": {
+                        "name": "GatewaySubnet",
+                        "range": "10.0.1.224/27"
+                    }
+                }
             }
         },
-        "onPremVNetInfo": {
+        "onPremisesVnetConfiguration": {
             "value": {
                 "name": "vnet-onpremises",
-                "range": "10.0.0.0/24"
+                "range": "10.0.0.0/24",
+                "subnets": {
+                    "NetworkVirtualAppliances": {
+                        "name": "NetworkVirtualAppliances",
+                        "range": "10.0.0.0/27"
+                    },
+                    "GatewaySubnet": {
+                        "name": "GatewaySubnet",
+                        "range": "10.0.0.224/27"
+                    }
+                }
             }
         },
-        "spoke1VNetInfo": {
+        "spoke1VnetConfiguration": {
             "value": {
                 "name": "vnet-spoke1",
-                "range": "10.0.2.0/24"
+                "range": "10.0.2.0/24",
+                "subnets": {
+                    "Frontend": {
+                        "name": "Frontend",
+                        "range": "10.0.2.0/27"
+                    },
+                    "Backend": {
+                        "name": "Backend",
+                        "range": "10.0.2.32/27"
+                    }
+                }
             }
         },
-        "privateLinkVNetInfo": {
+        "spoke1VmConfiguration": {
+            "value": {
+                "name": "vm-spoke1",
+                "sku": "Standard_DS2_V2",
+                "nicName": "nic-spoke1",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "spoke1StorageConfiguration": {
+            "value": {
+                "name": "saprivatelinkdemo2",
+                "privateEndpointName": "pe-saprivatelinkdemo"
+            }
+        },
+        "privateLinkVnetConfiguration": {
             "value": {
                 "name": "vnet-privatelink",
-                "range": "192.168.0.0/24"
+                "range": "192.168.0.0/24",
+                "subnets": {
+                    "PrivateLinkNat": {
+                        "name": "PrivateLinkNat",
+                        "range": "192.168.0.0/27"
+                    },
+                    "PrivateLinkWorkload": {
+                        "name": "PrivateLinkWorkload",
+                        "range": "192.168.0.32/27"
+                    }
+                }
             }
         }
     }
