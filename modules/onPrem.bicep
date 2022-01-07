@@ -70,8 +70,13 @@ resource VPNGatewayPublicIP 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
   location: location
   tags: tags
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
   }
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  zones: []
 }
 
 resource VPNGatewayPublicIP2 'Microsoft.Network/publicIPAddresses@2021-02-01' = {
@@ -79,8 +84,13 @@ resource VPNGatewayPublicIP2 'Microsoft.Network/publicIPAddresses@2021-02-01' = 
   location: location
   tags: tags
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
   }
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  zones: []
 }
 
 resource VPNGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
@@ -122,19 +132,20 @@ resource VPNGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
       }
     ]
     activeActive: true
-    enableBgp: false
-    bgpSettings: {
-      asn: 65510
-      bgpPeeringAddresses: [
-        {
-          ipconfigurationId: VPNGatewayPublicIP.properties.ipConfiguration.id
-          customBgpIpAddresses: []
-        }
-        {
-          ipconfigurationId: VPNGatewayPublicIP2.properties.ipConfiguration.id
-          customBgpIpAddresses: []
-        }
-      ]
-    }
+    enableBgp: true
+  // Can't access ipConfigurationIds until they have been attached to the VPN Gateway. It works fine if run again afterwards, but not during first deployment.
+  //   bgpSettings: {
+  //     asn: 65510
+  //     bgpPeeringAddresses: [
+  //       {
+  //         ipconfigurationId: '/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Network/virtualNetworkGateways/${vpnGateway.name}/ipConfigurations/${ipConfig1Name}' ///subscriptions/0d8f2360-c696-4129-a89c-c129419da2e9/resourceGroups/rg-network-fundamentals/providers/Microsoft.Network/virtualNetworkGateways/gw-vpn-onpremises/ipConfigurations/default
+  //         customBgpIpAddresses: []
+  //       }
+  //       {
+  //         ipconfigurationId: VPNGatewayPublicIP2.properties.ipConfiguration.id
+  //         customBgpIpAddresses: []
+  //       }
+  //     ]
+  //   }
   }
 }
