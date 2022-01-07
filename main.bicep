@@ -32,7 +32,7 @@ module VNetOnPrem 'modules/onPrem.bicep' = {
   params: {
     tags: tags
     info: onPremVNetInfo
-    vmOnPremAdminPassword: vmOnPremAdminPassword //They are all created with the same password
+    vmAdminPassword: vmOnPremAdminPassword //They are all created with the same password
   }
 }
 

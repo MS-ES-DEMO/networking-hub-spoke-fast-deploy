@@ -2,7 +2,7 @@ param location string = resourceGroup().location
 param tags object
 param info object
 @secure()
-param vmOnPremAdminPassword string
+param vmAdminPassword string
 
 var vms = info.vms
 var vpnGateway = info.vpnGateway
@@ -33,7 +33,7 @@ module VMswithNICs './VM+NICs.bicep' = [for vm in vms: {
     vmInfo: vm
     vNet: VNet
     location: location
-    adminPassword: vmOnPremAdminPassword
+    adminPassword: vmAdminPassword
     tags: tags
   }
 }]
