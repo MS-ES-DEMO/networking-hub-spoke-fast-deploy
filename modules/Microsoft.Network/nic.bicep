@@ -6,6 +6,8 @@ param snetName string
 param vnetName string
 param vnetResourceGroupName string
 
+param loadBalancerBackendAddressPools array = []
+
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' existing = {
   name: vnetName
@@ -32,6 +34,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
           }
           primary: true
           privateIPAddressVersion: 'IPv4'
+          loadBalancerBackendAddressPools: empty(loadBalancerBackendAddressPools) ? [] : loadBalancerBackendAddressPools
         }
       }
     ]
