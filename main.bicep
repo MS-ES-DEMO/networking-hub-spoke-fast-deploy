@@ -19,7 +19,7 @@ param spoke1VmConfiguration object
 param spoke1StorageConfiguration object
 
 param privateLinkVnetConfiguration object
-
+param privateLinkVmConfiguration object
 
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -68,6 +68,9 @@ module privatelink 'base/privatelink.bicep' = {
     tags: tags
     vnetConfiguration: privateLinkVnetConfiguration
     subnetConfiguration: privateLinkVnetConfiguration.subnets
-  }
+    adminPassword: adminPassword
+    vmConfiguration: privateLinkVmConfiguration
+  } 
 }
+
 

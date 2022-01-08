@@ -11,7 +11,7 @@
             }
         },
         "resourceGroupName": {
-            "value": "rg-1"
+            "value": "rg-2"
         },
         "hubVnetConfiguration": {
             "value": {
@@ -76,14 +76,22 @@
         "spoke1VmConfiguration": {
             "value": {
                 "name": "vm-spoke1",
-                "sku": "Standard_DS2_V2",
+                "sku": "Standard_DS1_V2",
                 "nicName": "nic-spoke1",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "privateLinkVmConfiguration": {
+            "value": {
+                "name": "vm-privatelink",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-privateLink",
                 "adminUsername": "azureAdmin"
             }
         },
         "spoke1StorageConfiguration": {
             "value": {
-                "name": "saprivatelinkdemo2",
+                "name": "saprivatelinkdemo0",
                 "privateEndpointName": "pe-saprivatelinkdemo"
             }
         },
