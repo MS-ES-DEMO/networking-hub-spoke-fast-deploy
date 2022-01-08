@@ -21,6 +21,10 @@ param spoke1StorageConfiguration object
 param privateLinkVnetConfiguration object
 param privateLinkVmConfiguration object
 
+param hubBastionConfiguration object
+
+@description('Azure Firewall configuration parameters')
+param firewallConfiguration object
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -35,6 +39,8 @@ module hub 'base/hub.bicep' = {
     tags: tags
     vnetConfiguration: hubVnetConfiguration
     subnetConfiguration: hubVnetConfiguration.subnets
+    bastionName: hubBastionConfiguration.name
+    firewallConfiguration: firewallConfiguration
   }
 }
 
