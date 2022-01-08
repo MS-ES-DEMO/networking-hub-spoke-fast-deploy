@@ -17,6 +17,8 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01' = {
       name: '${snetInfo.value.name}'
       properties: {
         addressPrefix: '${snetInfo.value.range}'
+        privateEndpointNetworkPolicies: 'Disabled'
+        privateLinkServiceNetworkPolicies: 'Disabled'
       }
     }]
   }
