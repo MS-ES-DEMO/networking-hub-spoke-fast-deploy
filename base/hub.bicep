@@ -18,6 +18,9 @@ var appRulesInfo = firewallConfiguration.appCollectionRules.rulesInfo
 var networkRuleCollectionGroupName = firewallConfiguration.networkCollectionRules.name
 var networkRulesInfo = firewallConfiguration.networkCollectionRules.rulesInfo
 
+param vmConfiguration object
+@secure()
+param adminPassword string
 
 module vnet '../modules/Microsoft.Network/vnet.bicep' = {
   name: vnetConfiguration.name
@@ -104,5 +107,119 @@ module firewallResources '../modules/Microsoft.Network/firewall.bicep' = {
     fwPolicyInfo: fwPolicyInfo
     fwPublicIpName: fwPublicIpName
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.AzureFirewall.name)
+  }
+}
+
+
+
+
+module nicVmNva '../modules/Microsoft.Network/nic.bicep' = {
+  name: '${vmConfiguration.nicName}-Deploy'
+  params: {
+    name: vmConfiguration.nicName
+    tags: tags
+    snetName: subnetConfiguration.NetworkVirtualAppliances.name
+    vnetResourceGroupName: resourceGroup().name
+    vnetName: vnetConfiguration.name
+  }
+}
+
+module vmNva '../modules/Microsoft.Compute/vm.bicep' = {
+  name: '${vmConfiguration.name}-Deploy'
+  dependsOn: [
+    nicVmNva
+  ]
+  params: {
+    adminPassword: adminPassword
+    adminUsername: vmConfiguration.adminUsername
+    name: vmConfiguration.name
+    nicName: vmConfiguration.nicName
+    tags: tags
+    vmSize: vmConfiguration.sku
+  }
+}
+
+
+resource vpnPublicIp 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
+  name: 'gw-vpn-hub-pip'
+  location: resourceGroup().location
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Dynamic'
+    
+  }
+}
+
+resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
+  name: 'gw-vpn-hub'
+  location: resourceGroup().location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipConfiguration'
+        properties: {
+          publicIPAddress: {
+            id: vpnPublicIp.id
+          }
+          subnet: {
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.Gateway.name)
+          }
+        }
+      }
+    ]
+    sku: {
+      name: 'VpnGw1'
+      tier: 'VpnGw1'
+    }
+    enableBgp: true
+    vpnType: 'RouteBased'
+    bgpSettings: {
+      asn: 60511
+    }
+  }
+}
+
+module routerServerPublicIp '../modules/Microsoft.Network/publicIp.bicep' = {
+  name: 'routerServerPip-Deploy'
+  params: {
+    name: 'routeServerPip'
+    tags: tags
+  }
+}
+
+resource routeServer 'Microsoft.Network/virtualHubs@2021-05-01' = {
+  name: 'routeServer'
+  location: resourceGroup().location
+  dependsOn: [
+    vnet
+  ]
+  tags: tags
+  properties: {
+    sku: 'Standard'
+  }
+  
+}
+
+resource routeServerIpConfig 'Microsoft.Network/virtualHubs/ipConfigurations@2021-05-01' = {
+  name: 'ipConfiguration'
+  parent: routeServer
+  properties: {
+    privateIPAllocationMethod: 'Dynamic'
+    publicIPAddress: {
+      id: resourceId('Microsoft.Network/publicIpAddresses', 'routeServerPip')
+    }
+    subnet: {
+      id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.RouteServer.name)
+    }
+  }
+}
+
+resource routeServerBgpConnection 'Microsoft.Network/virtualHubs/bgpConnections@2021-05-01' = {
+  name: 'bgpConfiguration'
+  parent: routeServer
+  properties: {
+    peerAsn: 60505
   }
 }
