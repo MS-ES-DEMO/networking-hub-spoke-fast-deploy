@@ -20,6 +20,9 @@ module vnet '../modules/Microsoft.Network/vnet.bicep' = {
 
 module nicVmSpoke1 '../modules/Microsoft.Network/nic.bicep' = {
   name: '${vmConfiguration.nicName}-Deploy'
+  dependsOn: [
+    vnet
+  ]
   params: {
     name: vmConfiguration.nicName
     tags: tags

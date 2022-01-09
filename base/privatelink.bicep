@@ -24,6 +24,9 @@ resource lbPrivateLink 'Microsoft.Network/loadBalancers@2021-05-01' = {
     name: 'Standard'
     tier: 'Regional'
   }  
+  dependsOn: [
+    vnet
+  ]
   properties: {
     backendAddressPools: [
       {
