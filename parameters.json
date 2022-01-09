@@ -11,7 +11,7 @@
             }
         },
         "resourceGroupName": {
-            "value": "rg-2"
+            "value": "rg-0"
         },
         "hubVnetConfiguration": {
             "value": {
@@ -44,6 +44,14 @@
         "hubBastionConfiguration": {
             "value": {
                 "name": "bastion-hub"
+            }
+        },
+        "hubNvaVmConfiguration": {
+            "value": {
+                "name": "vm-nvahub",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-nvahub",
+                "adminUsername": "azureAdmin"
             }
         },
         "firewallConfiguration": {
@@ -170,6 +178,14 @@
                 }
             }
         },
+        "onPremisesVmConfiguration": {
+            "value": {
+                "name": "vm-onpremises",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-onpremises",
+                "adminUsername": "azureAdmin"
+            }
+        },
         "spoke1VnetConfiguration": {
             "value": {
                 "name": "vnet-spoke1",
@@ -204,7 +220,7 @@
         },
         "spoke1StorageConfiguration": {
             "value": {
-                "name": "saprivatelinkdemo0",
+                "name": "saprivatelinkdemo1",
                 "privateEndpointName": "pe-saprivatelinkdemo"
             }
         },

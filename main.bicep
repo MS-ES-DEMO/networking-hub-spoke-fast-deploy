@@ -12,7 +12,10 @@ param timeStamp string = utcNow()
 param adminPassword string
 
 param hubVnetConfiguration object
+param hubNvaVmConfiguration object
+
 param onPremisesVnetConfiguration object
+param onPremisesVmConfiguration object
 
 param spoke1VnetConfiguration object
 param spoke1VmConfiguration object
@@ -41,6 +44,8 @@ module hub 'base/hub.bicep' = {
     subnetConfiguration: hubVnetConfiguration.subnets
     bastionName: hubBastionConfiguration.name
     firewallConfiguration: firewallConfiguration
+    adminPassword: adminPassword
+    vmConfiguration: hubNvaVmConfiguration
   }
 }
 
@@ -51,6 +56,8 @@ module onpremises 'base/onPremises.bicep' = {
     tags: tags
     vnetConfiguration: onPremisesVnetConfiguration
     subnetConfiguration: onPremisesVnetConfiguration.subnets
+    adminPassword: adminPassword
+    vmConfiguration: onPremisesVmConfiguration
   }
 }
 
