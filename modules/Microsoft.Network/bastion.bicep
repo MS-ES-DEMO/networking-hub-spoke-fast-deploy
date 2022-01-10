@@ -10,7 +10,7 @@ param skuName string = 'Standard'
 @maxValue(50)
 param scaleUnits int = 2
 param disableCopyPaste bool = true
-param dnsName string = name
+param dnsName string = '${name}${uniqueString(resourceGroup().id)}'
 param enableFileCopy bool = true
 param enableIpConnect bool = true
 param enableShareableLink bool = true
@@ -38,8 +38,8 @@ resource ip 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
     publicIPAllocationMethod: 'Static'
     deleteOption: 'Delete'
     dnsSettings: {
-      fqdn: name
-      domainNameLabel: name
+      fqdn: dnsName
+      domainNameLabel: dnsName
     }
   }
 }
