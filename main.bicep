@@ -4,8 +4,9 @@ targetScope = 'subscription'
 param location string
 @description('Tags associated with all resources')
 param tags object
+@description('Resource group where all resources would be deployed')
 param resourceGroupName string
-
+@description('Deployment suffix associated with the actual deployment time')
 param timeStamp string = utcNow()
 
 @secure()
@@ -13,6 +14,9 @@ param adminPassword string
 
 param hubVnetConfiguration object
 param hubNvaVmConfiguration object
+param hubBastionConfiguration object
+param hubFirewallConfiguration object
+
 
 param onPremisesVnetConfiguration object
 param onPremisesVmConfiguration object
@@ -23,11 +27,7 @@ param spoke1StorageConfiguration object
 
 param privateLinkVnetConfiguration object
 param privateLinkVmConfiguration object
-
-param hubBastionConfiguration object
-
-@description('Azure Firewall configuration parameters')
-param firewallConfiguration object
+param privateLinkLoadBalancerConfiguration object
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -43,7 +43,7 @@ module hub 'base/hub.bicep' = {
     vnetConfiguration: hubVnetConfiguration
     subnetConfiguration: hubVnetConfiguration.subnets
     bastionName: hubBastionConfiguration.name
-    firewallConfiguration: firewallConfiguration
+    firewallConfiguration: hubFirewallConfiguration
     adminPassword: adminPassword
     vmConfiguration: hubNvaVmConfiguration
   }
@@ -83,7 +83,8 @@ module privatelink 'base/privatelink.bicep' = {
     subnetConfiguration: privateLinkVnetConfiguration.subnets
     adminPassword: adminPassword
     vmConfiguration: privateLinkVmConfiguration
-  } 
+    loadBalancerConfiguration: privateLinkLoadBalancerConfiguration
+  }  
 }
 
 

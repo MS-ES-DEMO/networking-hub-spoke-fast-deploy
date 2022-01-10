@@ -11,7 +11,7 @@
             }
         },
         "resourceGroupName": {
-            "value": "rg-0"
+            "value": "rg-2"
         },
         "hubVnetConfiguration": {
             "value": {
@@ -54,7 +54,7 @@
                 "adminUsername": "azureAdmin"
             }
         },
-        "firewallConfiguration": {
+        "hubFirewallConfiguration": {
             "value": {
                 "name": "azfw",
                 "ipName": "pip-fw",
@@ -218,9 +218,49 @@
                 "adminUsername": "azureAdmin"
             }
         },
+        "privateLinkLoadBalancerConfiguration": {
+            "value": {
+                "name": "lb-privatelink",
+                "sku": {
+                    "name": "Standard",
+                    "tier": "Regional"
+                },
+                "backendAddressPools": [
+                    {
+                        "name": "backendPool"
+                    }
+                ],
+                "frontendIpConfigurations": {
+                    "frontendIp1": {
+                        "name": "frontendIp1",
+                        "allocationMethod": "Dynamic",
+                        "vnetName": "vnet-privatelink",
+                        "subnetName": "PrivateLinkNat"
+                    }
+                },
+                "probes": [
+                    {
+                        "name": "HTTP-80",
+                        "port": 80,
+                        "protocol": "Tcp"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "HTTP-80",
+                        "frontendPort": 80,
+                        "backendPort": 80,
+                        "protocol": "Tcp",
+                        "frontendIPConfigurationName": "frontendIp1",
+                        "backendAddressPoolName": "backendpool",
+                        "probeName": "HTTP-80"
+                    }
+                ]
+            }
+        },
         "spoke1StorageConfiguration": {
             "value": {
-                "name": "saprivatelinkdemo1",
+                "name": "saprivatelinkdemo02",
                 "privateEndpointName": "pe-saprivatelinkdemo"
             }
         },
