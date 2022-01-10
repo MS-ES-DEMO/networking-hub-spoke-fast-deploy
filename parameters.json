@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "northeurope"
+            "value": "westeurope"
         },
         "tags": {
             "value": {
@@ -22,7 +22,46 @@
         "onPremVNetInfo": {
             "value": {
                 "name": "vnet-onpremises",
-                "range": "10.0.0.0/24"
+                "range": "10.0.0.0/24",
+                "subnets": [
+                    {
+                        "name": "NetworkVirtualAppliances",
+                        "range": "10.0.0.0/28"
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "range": "10.0.0.224/27"
+                    }
+                ],
+                "vpnGateway": {
+                    /* "localGateway": {
+                        "name": "gw-local-gateway",
+                        "publicIPName": "pip-local-gateway",
+                        "addressSpace": "10.0.0.224/27"
+                    }, */
+                    "name": "gw-vpn-onpremises",
+                    "publicIPName": "pip-vpn-onpremises",
+                    "publicIP2Name": "pip-vpn-onpremises2",
+                    "subnetName": "GatewaySubnet"
+                },
+                "vms": [
+                    {
+                        "name": "vm-onpremises",
+                        "sku": "Standard_DS2_V2",
+                        "adminUsername": "azureAdmin",
+                        "createOption": "FromImage",
+                        "osType": "Linux",
+                        "osDiskSizeGB": 30,
+                        "osDiskType": "Standard_LRS",
+                        "nics": [
+                            {
+                                "name": "nic-vm-onpremises",
+                                "subnetName": "NetworkVirtualAppliances",
+                                "privateIPAddress": "10.0.0.4"
+                            }
+                        ]
+                    }
+                ]
             }
         },
         "spoke1VNetInfo": {

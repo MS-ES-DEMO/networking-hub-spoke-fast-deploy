@@ -8,7 +8,9 @@ param resourceGroupName string
 param hubVNetInfo object
 param onPremVNetInfo object
 param spoke1VNetInfo object
-param privateLinkVNetInfo object
+@description('Admin password for onPrem VM')
+@secure()
+param vmOnPremAdminPassword string
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -28,7 +30,9 @@ module VNetOnPrem 'modules/onPrem.bicep' = {
   scope: resourceGroup
   name: onPremVNetInfo.name
   params: {
+    tags: tags
     info: onPremVNetInfo
+    vmAdminPassword: vmOnPremAdminPassword //They are all created with the same password
   }
 }
 
