@@ -1,29 +1,29 @@
 param tags object
- 
+
 param vnetConfiguration object
 param subnetConfiguration object
-
-param bastionName string
-
-@description('Azure Firewall configuration parameters')
-param firewallConfiguration object
-
-var fwPublicIpName = firewallConfiguration.ipName
-var firewallName = firewallConfiguration.name
-
-var fwPolicyInfo = firewallConfiguration.policy
-var appRuleCollectionGroupName = firewallConfiguration.appCollectionRules.name
-var appRulesInfo = firewallConfiguration.appCollectionRules.rulesInfo
-
-var networkRuleCollectionGroupName = firewallConfiguration.networkCollectionRules.name
-var networkRulesInfo = firewallConfiguration.networkCollectionRules.rulesInfo
 
 param vmConfiguration object
 @secure()
 param adminPassword string
 
+param bastionName string
+
+param firewallConfiguration object
+var firewallName = firewallConfiguration.name
+var firewallPublicIpName = firewallConfiguration.ipName
+var firewallPolicyInfo = firewallConfiguration.policy
+var appRuleCollectionGroupName = firewallConfiguration.appCollectionRules.name
+var appRulesInfo = firewallConfiguration.appCollectionRules.rulesInfo
+var networkRuleCollectionGroupName = firewallConfiguration.networkCollectionRules.name
+var networkRulesInfo = firewallConfiguration.networkCollectionRules.rulesInfo
+
+param timeStamp string = utcNow()
+
+// Networking
+
 module vnet '../modules/Microsoft.Network/vnet.bicep' = {
-  name: vnetConfiguration.name
+  name: '${vnetConfiguration.name}-Deploy-${timeStamp}'
   params: {
     tags: tags
     vnetConfiguration: vnetConfiguration
@@ -31,9 +31,10 @@ module vnet '../modules/Microsoft.Network/vnet.bicep' = {
   }
 }
 
+// Azure Bastion
 
 module bastion '../modules/Microsoft.Network/bastion.bicep' = {
-  name: 'bastionResources_Deploy'
+  name: 'bastionResources-Deploy-${timeStamp}'
   dependsOn: [
     vnet
   ]
@@ -46,53 +47,53 @@ module bastion '../modules/Microsoft.Network/bastion.bicep' = {
   }
 }
 
+// Azure Firewall
 
 module fwPolicyResources '../modules/Microsoft.Network/fwPolicy.bicep' = {
-  name: 'fwPolicyResources_Deploy'
+  name: 'fwPolicyResources-Deploy-${timeStamp}'
   params: {
     location: resourceGroup().location
     tags: tags
-    fwPolicyInfo: fwPolicyInfo
+    fwPolicyInfo: firewallPolicyInfo
   }
 }
 
 module fwAppRulesResources '../modules/Microsoft.Network/fwRules.bicep' = {
-  name: 'fwAppRulesResources_Deploy'
+  name: 'fwAppRulesResources-Deploy-${timeStamp}'
   dependsOn: [
     fwPolicyResources
   ]
   params: {
-    fwPolicyName: fwPolicyInfo.name
+    fwPolicyName: firewallPolicyInfo.name
     ruleCollectionGroupName: appRuleCollectionGroupName
     rulesInfo: appRulesInfo
   }
 }
 
 module fwNetworkRulesResources '../modules/Microsoft.Network/fwRules.bicep' = {
-  name: 'fwNetworkRulesResources_Deploy'
+  name: 'fwNetworkRulesResources-Deploy-${timeStamp}'
   dependsOn: [
     fwPolicyResources
     fwAppRulesResources
   ]
   params: {
-    fwPolicyName: fwPolicyInfo.name
+    fwPolicyName: firewallPolicyInfo.name
     ruleCollectionGroupName: networkRuleCollectionGroupName
     rulesInfo: networkRulesInfo
   }
 }
 
 module fwPublicIpResources '../modules/Microsoft.Network/publicIp.bicep' = {
-  name: 'fwPublicIpResources_Deploy'
+  name: 'fwPublicIpResources-Deploy-${timeStamp}'
   params: {
     location: resourceGroup().location
     tags: tags
-    name: fwPublicIpName
+    name: firewallPublicIpName
   }
-
 }
 
 module firewallResources '../modules/Microsoft.Network/firewall.bicep' = {
-  name: 'firewallResources_Deploy'
+  name: 'firewallResources-Deploy-${timeStamp}'
   dependsOn: [
     fwPublicIpResources
     fwPolicyResources
@@ -104,17 +105,19 @@ module firewallResources '../modules/Microsoft.Network/firewall.bicep' = {
     location: resourceGroup().location
     tags: tags
     name: firewallName
-    fwPolicyInfo: fwPolicyInfo
-    fwPublicIpName: fwPublicIpName
+    fwPolicyInfo: firewallPolicyInfo
+    fwPublicIpName: firewallPublicIpName
     subnetId: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.AzureFirewall.name)
   }
 }
 
-
-
+// NVA VM
 
 module nicVmNva '../modules/Microsoft.Network/nic.bicep' = {
-  name: '${vmConfiguration.nicName}-Deploy'
+  name: '${vmConfiguration.nicName}-Deploy-${timeStamp}'
+  dependsOn: [
+    vnet
+  ]
   params: {
     name: vmConfiguration.nicName
     tags: tags
@@ -125,7 +128,7 @@ module nicVmNva '../modules/Microsoft.Network/nic.bicep' = {
 }
 
 module vmNva '../modules/Microsoft.Compute/vm.bicep' = {
-  name: '${vmConfiguration.name}-Deploy'
+  name: '${vmConfiguration.name}-Deploy-${timeStamp}'
   dependsOn: [
     nicVmNva
   ]
@@ -139,50 +142,51 @@ module vmNva '../modules/Microsoft.Compute/vm.bicep' = {
   }
 }
 
+// VPN
 
-resource vpnPublicIp 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
-  name: 'gw-vpn-hub-pip'
-  location: resourceGroup().location
-  sku: {
-    name: 'Basic'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Dynamic'
-    
+module vpnPublicIp1 '../modules/Microsoft.Network/publicIp.bicep' = {
+  name: 'gw-vpn-hub-pip1-Deploy-${timeStamp}'
+  params: {
+    name: 'gw-vpn-hub-pip1'
+    tags: tags
   }
 }
 
-resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
-  name: 'gw-vpn-hub'
-  location: resourceGroup().location
-  properties: {
-    ipConfigurations: [
+module vpnPublicIp2 '../modules/Microsoft.Network/publicIp.bicep' = {
+  name: 'gw-vpn-hub-pip2-Deploy-${timeStamp}'
+  params: {
+    name: 'gw-vpn-hub-pip2'
+    tags: tags
+  }
+}
+
+module vpnGateway '../modules/Microsoft.Network/vpnGateway.bicep' = {
+  name: 'gw-vpn-hub-Deploy-${timeStamp}'
+  dependsOn: [
+    vnet
+  ]
+  params: {
+    name: 'gw-vpn-hub'
+    enableActiveActive: true
+    ipConfiguration: [
       {
-        name: 'ipConfiguration'
-        properties: {
-          publicIPAddress: {
-            id: vpnPublicIp.id
-          }
-          subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.Gateway.name)
-          }
-        }
+        'name': 'ipConfiguration1'
+        'publicIpId': vpnPublicIp1.outputs.id
+        'subnetId': resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.Gateway.name)
+      }
+      {
+        'name': 'ipConfiguration2'
+        'publicIpId': vpnPublicIp2.outputs.id
+        'subnetId': resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.Gateway.name)
       }
     ]
-    sku: {
-      name: 'VpnGw1'
-      tier: 'VpnGw1'
-    }
-    enableBgp: true
-    vpnType: 'RouteBased'
-    bgpSettings: {
-      asn: 60511
-    }
   }
 }
 
+// Route Server
+
 module routerServerPublicIp '../modules/Microsoft.Network/publicIp.bicep' = {
-  name: 'routerServerPip-Deploy'
+  name: 'routerServerPip-Deploy-${timeStamp}'
   params: {
     name: 'routeServerPip'
     tags: tags
@@ -194,17 +198,20 @@ resource routeServer 'Microsoft.Network/virtualHubs@2021-05-01' = {
   location: resourceGroup().location
   dependsOn: [
     vnet
+    vpnGateway
   ]
   tags: tags
   properties: {
     sku: 'Standard'
   }
-  
 }
 
 resource routeServerIpConfig 'Microsoft.Network/virtualHubs/ipConfigurations@2021-05-01' = {
   name: 'ipConfiguration'
   parent: routeServer
+  dependsOn: [
+    vpnGateway
+  ]
   properties: {
     privateIPAllocationMethod: 'Dynamic'
     publicIPAddress: {
@@ -213,13 +220,5 @@ resource routeServerIpConfig 'Microsoft.Network/virtualHubs/ipConfigurations@202
     subnet: {
       id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.RouteServer.name)
     }
-  }
-}
-
-resource routeServerBgpConnection 'Microsoft.Network/virtualHubs/bgpConnections@2021-05-01' = {
-  name: 'bgpConfiguration'
-  parent: routeServer
-  properties: {
-    peerAsn: 60505
   }
 }
