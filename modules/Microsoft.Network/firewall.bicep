@@ -19,11 +19,6 @@ resource firewall 'Microsoft.Network/azureFirewalls@2020-06-01' = {
   name: name
   location: location
   tags: tags
-  zones: [
-    '1'
-    '2'
-    '3'
-  ]
   properties: {
     sku: {
       name:  'AZFW_VNet'
