@@ -30,8 +30,11 @@ resource vpnPublicIp 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
 }
 
 resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
-  name: 'gw-vpn-onpremises'
+  name: 'gw-vpn-onprem'
   location: resourceGroup().location
+  dependsOn: [
+    vnet
+  ]
   properties: {
     ipConfigurations: [
       {
@@ -62,6 +65,9 @@ resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
 
 module nicVmOnpremises '../modules/Microsoft.Network/nic.bicep' = {
   name: '${vmConfiguration.nicName}-Deploy'
+  dependsOn: [
+    vnet
+  ]
   params: {
     name: vmConfiguration.nicName
     tags: tags
