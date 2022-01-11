@@ -168,6 +168,9 @@ module vpnGateway '../modules/Microsoft.Network/vpnGateway.bicep' = {
   params: {
     name: 'gw-vpn-hub'
     enableActiveActive: true
+    bgpSettings: {
+      'asn': 60509
+    }
     ipConfiguration: [
       {
         'name': 'ipConfiguration1'
@@ -222,3 +225,6 @@ resource routeServerIpConfig 'Microsoft.Network/virtualHubs/ipConfigurations@202
     }
   }
 }
+
+
+output vpnGatewayId string = vpnGateway.outputs.id
