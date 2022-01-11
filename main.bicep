@@ -16,7 +16,8 @@ param hubVnetConfiguration object
 param hubNvaVmConfiguration object
 param hubBastionConfiguration object
 param hubFirewallConfiguration object
-
+@secure()
+param vpnSharedKey string
 
 param onPremisesVnetConfiguration object
 param onPremisesVmConfiguration object
@@ -87,4 +88,27 @@ module privatelink 'base/privatelink.bicep' = {
   }  
 }
 
+module vpnConnections 'base/connections.bicep' = {
+  name: 'vpnConnections-Deploy-${timeStamp}'
+  scope: resourceGroup
+  params: {
+    tags: tags
+    virtualNetworkGateway1Id: hub.outputs.vpnGatewayId
+    virtualNetworkGateway2Id: onpremises.outputs.vpnGatewayId
+    sharedKey: vpnSharedKey
+  }
+}
 
+module privateEndpoint 'base/privateEndpoint.bicep' = {
+  scope: resourceGroup
+  name: 'privateEndpointLinkService-Deploy-${timeStamp}'
+  dependsOn: [
+    spoke1
+  ]
+  params: {
+    name: 'privateLink-app'
+    privateLinkServiceId: privatelink.outputs.privateLinkServiceId
+    vnetName : spoke1VnetConfiguration.name 
+    subnetName: spoke1VnetConfiguration.Subnets.Backend.name
+  }
+}

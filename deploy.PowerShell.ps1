@@ -6,7 +6,7 @@ param (
     [string]
     $parameterFile = "parameters.json",
     [string]
-    $deploymentPrefix = 'Network-Fundamentals'
+    $deploymentPrefix = 'Network-Fd'
 )
 
 $date = $((Get-Date -UFormat "%Y-%m-%dT%H-%M-%S_%ZZ").Replace("+", ""))
@@ -17,4 +17,4 @@ New-AzDeployment -Name $deploymentName `
     -Location $location `
     -TemplateFile $templateFile `
     -TemplateParameterFile $parameterFile `
-    -Verbose
+    -Verbose 
