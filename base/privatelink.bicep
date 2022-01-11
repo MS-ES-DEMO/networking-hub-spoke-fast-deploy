@@ -97,3 +97,6 @@ module vmPrivateLink '../modules/Microsoft.Compute/vm.bicep' = {
     vmSize: vmConfiguration.sku
   }
 }
+
+
+output privateLinkServiceId string = privateLink.id

@@ -46,3 +46,5 @@ resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
     bgpSettings: bgpSettings
   }
 }
+
+output id string = vpnGateway.id

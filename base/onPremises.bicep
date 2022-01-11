@@ -91,3 +91,6 @@ module vmOnpremises '../modules/Microsoft.Compute/vm.bicep' = {
     vmSize: vmConfiguration.sku
   }
 }
+
+
+output vpnGatewayId string = vpnGateway.id
