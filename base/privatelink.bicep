@@ -54,7 +54,7 @@ resource privateLink 'Microsoft.Network/privateLinkServices@2021-05-01' = {
           privateIPAllocationMethod: 'Dynamic'
           privateIPAddressVersion: 'IPv4'
           subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', loadBalancerConfiguration.frontendIpConfigurations.frontendIp1.vnetName, loadBalancerConfiguration.frontendIpConfigurations.frontendIp1.subnetName)
+            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.PrivateLinkNat.name)
           }
         }
       }
