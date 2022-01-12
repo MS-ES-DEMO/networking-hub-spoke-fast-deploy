@@ -8,6 +8,22 @@ param frontendIpConfigurations array
 param probes array 
 param loadBalancingRules array 
 
+resource lbPrivateLinkPip 'Microsoft.Network/publicIPAddresses@2021-05-01' = [for config in frontendIpConfigurations: { 
+  name: '${config.value.name}-pip'
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
+  }
+  zones: [
+    
+  ]
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}]
+
 resource lbPrivateLink 'Microsoft.Network/loadBalancers@2021-05-01' = {
   name: name
   tags: tags
@@ -15,12 +31,11 @@ resource lbPrivateLink 'Microsoft.Network/loadBalancers@2021-05-01' = {
   sku: sku
   properties: {
     backendAddressPools: backendAddressPools
-    frontendIPConfigurations: [for config in frontendIpConfigurations: {
+    frontendIPConfigurations: [for (config,i) in frontendIpConfigurations: {
       name: config.value.name
       properties: {
-        privateIPAllocationMethod: config.value.allocationMethod
-        subnet: {
-          id: resourceId('Microsoft.Network/virtualNetworks/subnets', config.value.vnetName, config.value.subnetName)
+        publicIPAddress: {
+          id: lbPrivateLinkPip[i].id
         }
       }
     }]
