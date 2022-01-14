@@ -52,6 +52,7 @@ resource lbPrivateLink 'Microsoft.Network/loadBalancers@2021-05-01' = {
         frontendPort: rule.frontendPort
         backendPort: rule.backendPort
         protocol: rule.protocol
+        disableOutboundSnat: true
         frontendIPConfiguration: {
           id: resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', name, rule.frontendIPConfigurationName)
         }
@@ -63,5 +64,21 @@ resource lbPrivateLink 'Microsoft.Network/loadBalancers@2021-05-01' = {
         }
       }
     }]
+    outboundRules: [
+      {
+        name: 'Allow-Internet'
+        properties: {
+          frontendIPConfigurations: [
+            {
+              id: resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', name, frontendIpConfigurations[0].value.name)
+            }
+          ] 
+          protocol: 'Tcp'
+          backendAddressPool: {
+            id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', name, backendAddressPools[0].name)
+          }
+        }
+      }
+    ]
   }
 }

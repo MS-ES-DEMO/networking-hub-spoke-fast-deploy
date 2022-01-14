@@ -98,5 +98,15 @@ module vmPrivateLink '../modules/Microsoft.Compute/vm.bicep' = {
   }
 }
 
+module customScriptPrivateLink '../modules/Microsoft.Compute/customScriptExtension.bicep' = {
+  name: 'customScriptExtension-Deploy'
+  dependsOn: [
+    vmPrivateLink
+  ]
+  params: {
+    commandToExecute: 'sudo apt-get update; sudo apt-get install apache2 -y'
+    vmName: vmConfiguration.name
+  }
+}
 
 output privateLinkServiceId string = privateLink.id
