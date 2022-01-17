@@ -9,7 +9,7 @@ param skuName string = 'Standard'
 @minValue(2)
 @maxValue(50)
 param scaleUnits int = 2
-param disableCopyPaste bool = true
+param disableCopyPaste bool = false
 param dnsName string = '${name}${uniqueString(resourceGroup().id)}'
 param enableFileCopy bool = true
 param enableIpConnect bool = true
