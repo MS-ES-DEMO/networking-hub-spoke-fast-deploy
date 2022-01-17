@@ -14,6 +14,7 @@ param adminPassword string
 
 param hubVnetConfiguration object
 param hubNvaVmConfiguration object
+param hubBgpVmConfiguration object
 param hubBastionConfiguration object
 param hubFirewallConfiguration object
 @secure()
@@ -46,7 +47,8 @@ module hub 'base/hub.bicep' = {
     bastionName: hubBastionConfiguration.name
     firewallConfiguration: hubFirewallConfiguration
     adminPassword: adminPassword
-    vmConfiguration: hubNvaVmConfiguration
+    vmNvaConfiguration: hubNvaVmConfiguration
+    vmBgpConfiguration: hubBgpVmConfiguration
   }
 }
 
@@ -96,6 +98,8 @@ module vpnConnections 'base/connections.bicep' = {
     virtualNetworkGateway1Id: hub.outputs.vpnGatewayId
     virtualNetworkGateway2Id: onpremises.outputs.vpnGatewayId
     sharedKey: vpnSharedKey
+    virtualNetworkHubName: hubVnetConfiguration.name
+    virtualNetworkSpokeName: spoke1VnetConfiguration.name
   }
 }
 
@@ -111,4 +115,4 @@ module privateEndpoint 'base/privateEndpoint.bicep' = {
     vnetName : spoke1VnetConfiguration.name 
     subnetName: spoke1VnetConfiguration.Subnets.Backend.name
   }
-}
+} 

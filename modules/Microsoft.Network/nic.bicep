@@ -43,3 +43,5 @@ resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
   }
 }
 
+
+output privateIp string = nic.properties.ipConfigurations[0].properties.privateIPAddress

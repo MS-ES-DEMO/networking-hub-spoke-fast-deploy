@@ -11,7 +11,7 @@
             }
         },
         "resourceGroupName": {
-            "value": "rg-2"
+            "value": "rg-network-fundamentals"
         },
         "hubVnetConfiguration": {
             "value": {
@@ -51,6 +51,14 @@
                 "name": "vm-nvahub",
                 "sku": "Standard_DS1_V2",
                 "nicName": "nic-nvahub",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "hubBgpVmConfiguration": {
+            "value": {
+                "name": "vm-bgphub",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-bgphub",
                 "adminUsername": "azureAdmin"
             }
         },
@@ -232,10 +240,7 @@
                 ],
                 "frontendIpConfigurations": {
                     "frontendIp1": {
-                        "name": "frontendIp1",
-                        "allocationMethod": "Dynamic",
-                        "vnetName": "vnet-privatelink",
-                        "subnetName": "PrivateLinkNat"
+                        "name": "frontendIp1"
                     }
                 },
                 "probes": [
@@ -260,7 +265,7 @@
         },
         "spoke1StorageConfiguration": {
             "value": {
-                "name": "saprivatelinkdemo02",
+                "name": "saprivatelinkdemo01",
                 "privateEndpointName": "pe-saprivatelinkdemo"
             }
         },
