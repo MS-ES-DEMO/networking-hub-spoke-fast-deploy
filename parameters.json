@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "northeurope"
+            "value": "westeurope"
         },
         "tags": {
             "value": {
@@ -13,28 +13,276 @@
         "resourceGroupName": {
             "value": "rg-network-fundamentals"
         },
-        "hubVnetInfo": {
+        "hubVnetConfiguration": {
             "value": {
                 "name": "vnet-hub",
-                "range": "10.0.1.0/24"
+                "range": "10.0.1.0/24",
+                "subnets": {
+                    "NetworkVirtualAppliances": {
+                        "name": "NetworkVirtualAppliances",
+                        "range": "10.0.1.0/26"
+                    },
+                    "AzureBastion": {
+                        "name": "AzureBastionSubnet",
+                        "range": "10.0.1.64/26"
+                    },
+                    "AzureFirewall": {
+                        "name": "AzureFirewallSubnet",
+                        "range": "10.0.1.128/26"
+                    },
+                    "RouteServer": {
+                        "name": "RouteServerSubnet",
+                        "range": "10.0.1.192/27"
+                    },
+                    "Gateway": {
+                        "name": "GatewaySubnet",
+                        "range": "10.0.1.224/27"
+                    }
+                }
             }
         },
-        "onPremVNetInfo": {
+        "hubBastionConfiguration": {
+            "value": {
+                "name": "bastion-hub"
+            }
+        },
+        "hubNvaVmConfiguration": {
+            "value": {
+                "name": "vm-nvahub",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-nvahub",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "hubBgpVmConfiguration": {
+            "value": {
+                "name": "vm-bgphub",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-bgphub",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "hubFirewallConfiguration": {
+            "value": {
+                "name": "azfw",
+                "ipName": "pip-fw",
+                "policy": {
+                    "name": "fwpolicy-001",
+                    "snatRanges": [
+                        "129.35.65.13",
+                        "82.132.128.0/17",
+                        "158.230.0.0/18",
+                        "158.230.64.0/19",
+                        "158.230.104.0/21",
+                        "158.230.112.0/20",
+                        "158.230.128.0/18",
+                        "193.35.171.0/24",
+                        "193.35.173.0/25",
+                        "193.113.120.0/25",
+                        "193.113.121.128/25",
+                        "193.113.160.0/25",
+                        "193.113.160.128/26",
+                        "193.113.200.128/25",
+                        "193.113.228.0/24",
+                        "193.132.40.0/24",
+                        "216.239.204.0/26",
+                        "216.239.204.192/26",
+                        "216.239.205.192/26",
+                        "216.239.206.0/25",
+                        "10.0.0.0/8",
+                        "172.16.0.0/12",
+                        "192.168.0.0/16",
+                        "100.64.0.0/10"
+                    ]
+                },
+                "appCollectionRules": {
+                    "name": "fwapprulegroup",
+                    "rulesInfo": {
+                        "priority": 300,
+                        "ruleCollections": [
+                            {
+                                "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                                "action": {
+                                    "type": "Allow"
+                                },
+                                "name": "AzureMonitorRuleCollection",
+                                "priority": 100,
+                                "rules": [
+                                    {
+                                        "ruleType": "ApplicationRule",
+                                        "name": "Allow-AzureMonitor",
+                                        "protocols": [
+                                            {
+                                                "protocolType": "Https",
+                                                "port": 443
+                                            }
+                                        ],
+                                        "targetFqdns": [
+                                            "*.monitor.core.windows.net"
+                                        ],
+                                        "sourceAddresses": [
+                                            "*"
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "networkCollectionRules": {
+                    "name": "fwapprulegroup",
+                    "rulesInfo": {
+                        "priority": 200,
+                        "ruleCollections": [
+                            {
+                                "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                                "name": "Windows",
+                                "action": {
+                                    "type": "Allow"
+                                },
+                                "priority": 210,
+                                "rules": [
+                                    {
+                                        "ruleType": "NetworkRule",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "destinationAddresses": [
+                                            "*"
+                                        ],
+                                        "destinationPorts": [
+                                            "*"
+                                        ],
+                                        "ipProtocols": [
+                                            "Any"
+                                        ],
+                                        "name": "All-Traffic-Allowed"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "dnatCollectionRules": {
+                    "name": "fwdnatrulegroup",
+                    "priority": "",
+                    "ruleSet": []
+                }
+            }
+        },
+        "onPremisesVnetConfiguration": {
             "value": {
                 "name": "vnet-onpremises",
-                "range": "10.0.0.0/24"
+                "range": "10.0.0.0/24",
+                "subnets": {
+                    "NetworkVirtualAppliances": {
+                        "name": "NetworkVirtualAppliances",
+                        "range": "10.0.0.0/27"
+                    },
+                    "GatewaySubnet": {
+                        "name": "GatewaySubnet",
+                        "range": "10.0.0.224/27"
+                    }
+                }
             }
         },
-        "spoke1VNetInfo": {
+        "onPremisesVmConfiguration": {
+            "value": {
+                "name": "vm-onpremises",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-onpremises",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "spoke1VnetConfiguration": {
             "value": {
                 "name": "vnet-spoke1",
-                "range": "10.0.2.0/24"
+                "range": "10.0.2.0/24",
+                "subnets": {
+                    "Frontend": {
+                        "name": "Frontend",
+                        "range": "10.0.2.0/27"
+                    },
+                    "Backend": {
+                        "name": "Backend",
+                        "range": "10.0.2.32/27"
+                    }
+                }
             }
         },
-        "privateLinkVNetInfo": {
+        "spoke1VmConfiguration": {
+            "value": {
+                "name": "vm-spoke1",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-spoke1",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "privateLinkVmConfiguration": {
+            "value": {
+                "name": "vm-privatelink",
+                "sku": "Standard_DS1_V2",
+                "nicName": "nic-privateLink",
+                "adminUsername": "azureAdmin"
+            }
+        },
+        "privateLinkLoadBalancerConfiguration": {
+            "value": {
+                "name": "lb-privatelink",
+                "sku": {
+                    "name": "Standard",
+                    "tier": "Regional"
+                },
+                "backendAddressPools": [
+                    {
+                        "name": "backendPool"
+                    }
+                ],
+                "frontendIpConfigurations": {
+                    "frontendIp1": {
+                        "name": "frontendIp1"
+                    }
+                },
+                "probes": [
+                    {
+                        "name": "HTTP-80",
+                        "port": 80,
+                        "protocol": "Tcp"
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "HTTP-80",
+                        "frontendPort": 80,
+                        "backendPort": 80,
+                        "protocol": "Tcp",
+                        "frontendIPConfigurationName": "frontendIp1",
+                        "backendAddressPoolName": "backendpool",
+                        "probeName": "HTTP-80"
+                    }
+                ]
+            }
+        },
+        "spoke1StorageConfiguration": {
+            "value": {
+                "name": "saprivatelinkdemo01",
+                "privateEndpointName": "pe-saprivatelinkdemo"
+            }
+        },
+        "privateLinkVnetConfiguration": {
             "value": {
                 "name": "vnet-privatelink",
-                "range": "192.168.0.0/24"
+                "range": "192.168.0.0/24",
+                "subnets": {
+                    "PrivateLinkNat": {
+                        "name": "PrivateLinkNat",
+                        "range": "192.168.0.0/27"
+                    },
+                    "PrivateLinkWorkload": {
+                        "name": "PrivateLinkWorkload",
+                        "range": "192.168.0.32/27"
+                    }
+                }
             }
         }
     }

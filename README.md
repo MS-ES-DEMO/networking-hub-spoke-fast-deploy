@@ -17,7 +17,7 @@ This repository is organized in the following folders:
 
 ## Prerequisites
 
-Bicep is the language used for defining declaratively the Azure resources required in this template. You would need to configure your development environment with Bicep support to succesfully deploy this scenario.
+Bicep is the language used for defining declaratively the Azure resources required in this template. You would need to configure your development environment with Bicep support to successfully deploy this scenario.
 
 - [Installing Bicep with Azure CLI](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-cli)
 - [Installing Bicep with Azure PowerShell](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-powershell)
@@ -36,7 +36,6 @@ After validating Bicep installation, you would need to configure the Azure subsc
 
 ## Parameters
 
-
 *The default parameter file contains all the possible options available in this environment. We recommend to adjust only the values of the parameters described here.*
 
 - *location*
@@ -45,4 +44,4 @@ After validating Bicep installation, you would need to configure the Azure subsc
 
 - *resourceGroupNames*
   - "type": "string",
-  - "description": "Allows to configure the specific resource group where the resources associated to that serice would be deployed. You can define the same resource group name for all resources in a test environment to simplify management and deletion after finishing with the evaluation."
+  - "description": "Allows to configure the specific resource group where the resources associated to that service would be deployed. You can define the same resource group name for all resources in a test environment to simplify management and deletion after finishing with the evaluation."
