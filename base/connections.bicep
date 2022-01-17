@@ -4,44 +4,57 @@ param location string = resourceGroup().location
 param virtualNetworkGateway1Id string
 param virtualNetworkGateway2Id string
 
+param virtualNetworkHubName string
+param virtualNetworkSpokeName string
+
 @secure()
 param sharedKey string
 
-resource hubToOnpremises 'Microsoft.Network/connections@2021-05-01' = {
-  name: 'hubToOnpremisesVpnConnection'
-  location: location
-  tags: tags
-  properties: {
-    connectionType: 'Vnet2Vnet'
+module hubToOnpremises '../modules/Microsoft.Network/vpnConnection.bicep' = {
+  name: 'hubToOnpremisesVpnConnection-Deploy'
+  params: {
+    name: 'hubToOnpremisesVpnConnection'
+    tags: tags
+    location: location
     sharedKey: sharedKey
-    enableBgp: true
-    virtualNetworkGateway1: {
-      id: virtualNetworkGateway1Id
-      properties: {}
-    }
-    virtualNetworkGateway2: {
-      id: virtualNetworkGateway2Id
-      properties: {}
+    virtualNetworkGateway1Id: virtualNetworkGateway1Id 
+    virtualNetworkGateway2Id: virtualNetworkGateway2Id
+  }
+}
+
+
+module onPremisesToHub '../modules/Microsoft.Network/vpnConnection.bicep' = {
+  name: 'onPremisesToHubVpnConnection-Deploy'
+  params: {
+    name: 'onPremisesToHubVpnConnection'
+    tags: tags
+    location: location
+    sharedKey: sharedKey
+    virtualNetworkGateway1Id: virtualNetworkGateway2Id 
+    virtualNetworkGateway2Id: virtualNetworkGateway1Id
+  }
+}
+
+resource spoke1ToHubPeering 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2021-05-01' = {
+  name: '${virtualNetworkSpokeName}/spoke1ToHubPeering'
+  properties: {
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    useRemoteGateways: true
+    remoteVirtualNetwork: {
+      id: resourceId('Microsoft.Networks/virtualNetworks', virtualNetworkHubName)
     }
   }
 }
 
-resource onPremisesToHub 'Microsoft.Network/connections@2021-05-01' = {
-  name: 'onPremisesToHubVpnConnection'
-  location: location
-  tags: tags
+resource hubToSpoke1Peering 'Microsoft.Network/virtualNetworks/virtualNetworkPeerings@2021-05-01' = {
+  name: '${virtualNetworkHubName}/hubToSpoke1Peering'
   properties: {
-    connectionType: 'Vnet2Vnet'
-    sharedKey: sharedKey
-    enableBgp: true
-    virtualNetworkGateway1: {
-      id: virtualNetworkGateway2Id
-      properties: {}
-    }
-    virtualNetworkGateway2: {
-      id: virtualNetworkGateway1Id
-      properties: {}
+    allowVirtualNetworkAccess: true
+    allowForwardedTraffic: true
+    allowGatewayTransit: true
+    remoteVirtualNetwork: {
+      id: resourceId('Microsoft.Networks/virtualNetworks', virtualNetworkSpokeName)
     }
   }
 }
-
