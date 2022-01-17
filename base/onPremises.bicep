@@ -3,7 +3,6 @@ param tags object
 param vnetConfiguration object
 param subnetConfiguration object
 
-
 param vmConfiguration object
 @secure()
 param adminPassword string
@@ -17,51 +16,35 @@ module vnet '../modules/Microsoft.Network/vnet.bicep' = {
   }
 }
 
-resource vpnPublicIp 'Microsoft.Network/publicIPAddresses@2021-05-01' = {
-  name: 'gw-vpn-onpremise-pip'
-  location: resourceGroup().location
-  sku: {
-    name: 'Basic'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Dynamic'
-    
+module vpnPublicIp '../modules/Microsoft.Network/publicIp.bicep' = {
+  name: 'gw-vpn-onpremise-pip-Deploy'
+  params: {
+    location: resourceGroup().location
+    tags: tags
+    name: 'gw-vpn-onpremise-pip'
+    allocationMethod: 'Dynamic'
+    sku: {
+      name: 'Basic'
+      tier: 'Regional'
+    }
   }
 }
 
-resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2021-05-01' = {
-  name: 'gw-vpn-onprem'
-  location: resourceGroup().location
-  dependsOn: [
-    vnet
-  ]
-  properties: {
-    ipConfigurations: [
+module vpnGateway '../modules/Microsoft.Network/vpnGateway.bicep' = {
+  name: 'gw-vpn-onprem-Deploy'
+  params: {
+    ipConfiguration: [
       {
-        name: 'ipConfiguration'
-        properties: {
-          publicIPAddress: {
-            id: vpnPublicIp.id
-          }
-          subnet: {
-            id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.GatewaySubnet.name)
-          }
-        }
+        'name': 'ipConfiguration1'
+        'publicIpId': vpnPublicIp.outputs.id
+        'subnetId': resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.GatewaySubnet.name)
       }
     ]
-    sku: {
-      name: 'VpnGw1'
-      tier: 'VpnGw1'
-    }
-    enableBgp: true
+    name: 'gw-vpn-onprem'
+    location: resourceGroup().location
     vpnType: 'RouteBased'
-    bgpSettings: {
-      asn: 60510
-    }
   }
 }
-
-
 
 module nicVmOnpremises '../modules/Microsoft.Network/nic.bicep' = {
   name: '${vmConfiguration.nicName}-Deploy'
@@ -92,5 +75,4 @@ module vmOnpremises '../modules/Microsoft.Compute/vm.bicep' = {
   }
 }
 
-
-output vpnGatewayId string = vpnGateway.id
+output vpnGatewayId string = vpnGateway.outputs.id
