@@ -1,0 +1,150 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_vm_nva_hub_name": {
+            "defaultValue": "vm-nva-hub",
+            "type": "String"
+        },
+        "virtualMachines_vm_privatelink_name": {
+            "defaultValue": "vm-privatelink",
+            "type": "String"
+        },
+        "connections_hub_onprem_name": {
+            "defaultValue": "hub-to-onprem",
+            "type": "String"
+        },
+        "connections_onprem_hub_name": {
+            "defaultValue": "onprem-to-hub",
+            "type": "String"
+        },
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String"
+        },
+        "firewallPolicies_fw_hub_policy_name": {
+            "defaultValue": "fw-hub-policy",
+            "type": "String"
+        },
+        "fw-policy-application-group": {
+            "defaultValue": "DefaultApplicationRuleCollectionGroup",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('firewallPolicies_fw_hub_policy_name'), '/', parameters('fw-policy-application-group'))]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "priority": 300,
+                "ruleCollections": [
+                    {
+                        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                        "action": {
+                            "type": "Deny"
+                        },
+                        "rules": [
+                            {
+                                "ruleType": "ApplicationRule",
+                                "name": "deny-google",
+                                "protocols": [
+                                    {
+                                        "protocolType": "Http",
+                                        "port": 80
+                                    },
+                                    {
+                                        "protocolType": "Https",
+                                        "port": 443
+                                    }
+                                ],
+                                "fqdnTags": [],
+                                "webCategories": [],
+                                "targetFqdns": [
+                                    "google.com"
+                                ],
+                                "targetUrls": [],
+                                "terminateTLS": false,
+                                "sourceAddresses": [
+                                    "10.0.0.0/22"
+                                ],
+                                "destinationAddresses": [],
+                                "sourceIpGroups": []
+                            }
+                        ],
+                        "name": "demo-application-collection",
+                        "priority": 500
+                    },
+                    {
+                        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                        "action": {
+                            "type": "Allow"
+                        },
+                        "rules": [
+                            {
+                                "ruleType": "ApplicationRule",
+                                "name": "allow-internet",
+                                "protocols": [
+                                    {
+                                        "protocolType": "Http",
+                                        "port": 80
+                                    },
+                                    {
+                                        "protocolType": "Https",
+                                        "port": 443
+                                    }
+                                ],
+                                "fqdnTags": [],
+                                "webCategories": [],
+                                "targetFqdns": [
+                                    "*"
+                                ],
+                                "targetUrls": [],
+                                "terminateTLS": false,
+                                "sourceAddresses": [
+                                    "*"
+                                ],
+                                "destinationAddresses": [],
+                                "sourceIpGroups": []
+                            }
+                        ],
+                        "name": "demo-application-collection-allow",
+                        "priority": 501
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/runCommands",
+            "apiVersion": "2021-07-01",
+            "name": "[concat(parameters('virtualMachines_vm_nva_hub_name'), '/initial-script')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/firewallPolicies/ruleCollectionGroups', parameters('firewallPolicies_fw_hub_policy_name'), parameters('fw-policy-application-group'))]"
+            ],
+            "properties": {
+                "source": {
+                    "script": "sudo apt update;sudo sysctl -w net.ipv4.ip_forward=1; sudo iptables -t nat -A POSTROUTING -s 10.0.3.0/24 -j MASQUERADE;sudo apt install ubuntu-desktop -y;sudo apt install xrdp -y;sudo adduser xrdp ssl-cert;sudo systemctl restart xrdp"
+                },
+                "timeoutInSeconds": 600
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/runCommands",
+            "apiVersion": "2021-07-01",
+            "name": "[concat(parameters('virtualMachines_vm_privatelink_name'), '/initial-script')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/firewallPolicies/ruleCollectionGroups', parameters('firewallPolicies_fw_hub_policy_name'), parameters('fw-policy-application-group'))]"
+            ],
+            "properties": {
+                "source": {
+                    "script": "sudo apt update;sudo apt install apache2 -y"
+                },
+                "timeoutInSeconds": 120
+            }
+        }
+    ]
+}
