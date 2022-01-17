@@ -3,6 +3,7 @@ param tags object = {}
 
 param vmName string
 param commandToExecute string
+param fileUris array
 
 param typeHandlerVersion string = '2.1'
 param autoUpgradeMinorVersion bool = false
@@ -21,6 +22,7 @@ resource customScript 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' 
     enableAutomaticUpgrade: enableAutomaticUpgrade
     protectedSettings: {
       commandToExecute: commandToExecute
+      fileUris: fileUris
     }
   }
 }

@@ -3,7 +3,8 @@ param tags object
 param vnetConfiguration object
 param subnetConfiguration object
 
-param vmConfiguration object
+param vmNvaConfiguration object
+param vmBgpConfiguration object
 @secure()
 param adminPassword string
 
@@ -111,15 +112,62 @@ module firewallResources '../modules/Microsoft.Network/firewall.bicep' = {
   }
 }
 
+// QUAGGA VM
+
+module nicVmBgp '../modules/Microsoft.Network/nic.bicep' = {
+  name: '${vmBgpConfiguration.nicName}-Deploy-${timeStamp}'
+  dependsOn: [
+    vnet
+    nicVmNva
+  ]
+  params: {
+    name: vmBgpConfiguration.nicName
+    tags: tags
+    snetName: subnetConfiguration.NetworkVirtualAppliances.name
+    vnetResourceGroupName: resourceGroup().name
+    vnetName: vnetConfiguration.name
+  }
+}
+
+module vmBgp '../modules/Microsoft.Compute/vm.bicep' = {
+  name: '${vmBgpConfiguration.name}-Deploy-${timeStamp}'
+  dependsOn: [
+    nicVmBgp
+  ]
+  params: {
+    adminPassword: adminPassword
+    adminUsername: vmBgpConfiguration.adminUsername
+    name: vmBgpConfiguration.name
+    nicName: vmBgpConfiguration.nicName
+    tags: tags
+    vmSize: vmBgpConfiguration.sku
+  }
+}
+
+module extensionBgp '../modules/Microsoft.Compute/customScriptExtension.bicep' = {
+  name: 'extensionBgp-Deploy'
+  dependsOn: [
+    vmBgp
+  ]
+  params: {
+    commandToExecute: 'sh quagga-config.sh'
+    fileUris: [
+      'https://saresourcesdeployjosef.blob.core.windows.net/resources/quagga-config.sh'
+    ]
+    vmName: vmBgpConfiguration.name
+  }
+
+}
+
 // NVA VM
 
 module nicVmNva '../modules/Microsoft.Network/nic.bicep' = {
-  name: '${vmConfiguration.nicName}-Deploy-${timeStamp}'
+  name: '${vmNvaConfiguration.nicName}-Deploy-${timeStamp}'
   dependsOn: [
     vnet
   ]
   params: {
-    name: vmConfiguration.nicName
+    name: vmNvaConfiguration.nicName
     tags: tags
     snetName: subnetConfiguration.NetworkVirtualAppliances.name
     vnetResourceGroupName: resourceGroup().name
@@ -128,19 +176,20 @@ module nicVmNva '../modules/Microsoft.Network/nic.bicep' = {
 }
 
 module vmNva '../modules/Microsoft.Compute/vm.bicep' = {
-  name: '${vmConfiguration.name}-Deploy-${timeStamp}'
+  name: '${vmNvaConfiguration.name}-Deploy-${timeStamp}'
   dependsOn: [
-    nicVmNva
+    nicVmBgp
   ]
   params: {
     adminPassword: adminPassword
-    adminUsername: vmConfiguration.adminUsername
-    name: vmConfiguration.name
-    nicName: vmConfiguration.nicName
+    adminUsername: vmNvaConfiguration.adminUsername
+    name: vmNvaConfiguration.name
+    nicName: vmNvaConfiguration.nicName
     tags: tags
-    vmSize: vmConfiguration.sku
+    vmSize: vmNvaConfiguration.sku
   }
 }
+
 
 // VPN
 
@@ -223,6 +272,18 @@ resource routeServerIpConfig 'Microsoft.Network/virtualHubs/ipConfigurations@202
     subnet: {
       id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetConfiguration.name, subnetConfiguration.RouteServer.name)
     }
+  }
+}
+
+resource routeServerConnection 'Microsoft.Network/virtualHubs/bgpConnections@2021-05-01' = {
+  name: 'vm-bgphub'
+  parent: routeServer
+  dependsOn: [
+    routeServerIpConfig
+  ]
+  properties: {
+    peerAsn: 65001
+    peerIp: nicVmBgp.outputs.privateIp
   }
 }
 
