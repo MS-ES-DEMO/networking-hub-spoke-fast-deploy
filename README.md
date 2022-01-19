@@ -34,6 +34,11 @@ After validating Bicep installation, you would need to configure the Azure subsc
 4. Wait around 50 minutes.
 5. Enjoy.
 
+### Arm Template alternative (pure JSON)
+
+Fill in the parameters and use the deployment script in `arm/`. The deployment time and results should be exactly the same.
+
+
 ## Parameters
 
 *The default parameter file contains all the possible options available in this environment. We recommend to adjust only the values of the parameters described here.*
